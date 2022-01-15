@@ -7,8 +7,12 @@ from parser import Parser
 
 def main():
     i = ''
-    while i != 'exit':
-        i = input('Expression: ')
+    while True:
+        try:
+            i = input('Expression: ')
+        except KeyboardInterrupt:
+            print('goodbye :)')
+            return
         parser = Parser(i)
         tree = parser.parse()
         if tree is None:
