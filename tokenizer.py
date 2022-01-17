@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum, auto, unique
 from re import match
 from typing import Mapping
 from sys import stderr
@@ -16,22 +16,28 @@ class Position:
         return f'{self.row}:{self.col}'
 
 
+@unique
 class TokenType(Enum):
-    WHITESPACE = 0,
-    NUMBER = auto(),
-    OP_PLUS = auto(),
-    OP_MINUS = auto(),
-    OP_MULT = auto(),
-    OP_POWER = auto(),
-    OP_DIV = auto(),
-    PAR_L = auto(),
-    PAR_R = auto(),
+    WHITESPACE = 0
+    VAR = auto()
+    LITERAL_NUM = auto()
+    LITERAL_STR = auto()
+    OP_PLUS = auto()
+    OP_MINUS = auto()
+    OP_MULT = auto()
+    OP_POWER = auto()
+    OP_DIV = auto()
+    PAR_L = auto()
+    PAR_R = auto()
+    ASSIGN = auto()
     IDENTIFIER = auto()
 
 
 regex_map: Mapping[str, TokenType] = {
     '[\s\n\t\r]': TokenType.WHITESPACE,
-    '\d+(\.\d+)?': TokenType.NUMBER,
+    'var': TokenType.VAR,
+    '\d+(\.\d+)?': TokenType.LITERAL_NUM,
+    '"(.*)"': TokenType.LITERAL_STR,
     '\+': TokenType.OP_PLUS,
     '\-': TokenType.OP_MINUS,
     '\*': TokenType.OP_MULT,
@@ -39,7 +45,8 @@ regex_map: Mapping[str, TokenType] = {
     '/': TokenType.OP_DIV,
     '\(': TokenType.PAR_L,
     '\)': TokenType.PAR_R,
-    '[a-zA-Z]([a-zA-Z0-9])*': TokenType.IDENTIFIER
+    '=': TokenType.ASSIGN,
+    '[a-zA-Z]([a-zA-Z0-9])*': TokenType.IDENTIFIER,
 }
 
 
@@ -72,7 +79,7 @@ class Tokenizer:
     def generator(self):
         while len(self.string) > 0:
             token = self._match_next_token()
-            if token == None:
+            if token is None:
                 print(
                     f'Invalid token[{self.current_position}]: {self.string}', file=stderr
                 )
