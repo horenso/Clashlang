@@ -1,3 +1,4 @@
+from optparse import Option
 from node import AssigmentNode, Node, BinOpNode, IdNode, NumNode
 from tokenizer import Token, TokenType
 from typing import Iterator, Optional
@@ -52,10 +53,26 @@ class Parser():
                 return None
             return result
         return None
+    
+    def Block(self) -> Optional[Node]:
+        if not self.accept(TokenType.CURL_L):
+            return None
+        stmts = []
+        while True:
+            stmt_node = self.Stmt()
+            if stmt_node:
+                stmts.append(stmt_node)
+            else:
+                break
+        if not self.accept(TokenType.CURL_R):
+            return None
+        return 
 
-    # S -> var id = E | E
+    # S -> let id = E;
+    #    | ifS
+    #    | E;
     def Stmt(self) -> Optional[Node]:
-        if self.accept(TokenType.VAR):
+        if self.accept(TokenType.LET):
             id_token = self.accept(TokenType.IDENTIFIER)
             if not id_token:
                 return None
@@ -64,8 +81,21 @@ class Parser():
             expression_node = self.Expr()
             if not expression_node:
                 return None
+            if not self.accept(TokenType.SEMICOLON):
+                return None
             return AssigmentNode(id_token, expression_node)
-        return self.Expr()
+        if_node = self.If_Stmt()
+        if if_node:
+            return if_node
+        expression_node = self.Expr()
+        if not expression_node:
+            return None
+        if not self.accept(TokenType.SEMICOLON):
+            return None
+        return expression_node
+
+    def If_Stmt(self) -> Optional[Node]:
+        pass
 
     # E -> T {+|- T}*
     def Expr(self) -> Optional[Node]:

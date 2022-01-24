@@ -19,7 +19,11 @@ class Position:
 @unique
 class TokenType(Enum):
     WHITESPACE = 0
-    VAR = auto()
+    SEMICOLON = auto()
+    IF = auto()
+    ELSE = auto()
+    LET = auto()
+    LITERAL_BOOL = auto()
     LITERAL_NUM = auto()
     LITERAL_STR = auto()
     OP_PLUS = auto()
@@ -29,13 +33,21 @@ class TokenType(Enum):
     OP_DIV = auto()
     PAR_L = auto()
     PAR_R = auto()
+    CURL_L = auto()
+    CURL_R = auto()
+    BRK_L = auto()
+    BRK_R = auto()
     ASSIGN = auto()
     IDENTIFIER = auto()
 
 
 regex_map: Mapping[str, TokenType] = {
     '[\s\n\t\r]': TokenType.WHITESPACE,
-    'var': TokenType.VAR,
+    ';': TokenType.SEMICOLON,
+    'if': TokenType.IF,
+    'else': TokenType.ELSE,
+    'let': TokenType.LET,
+    'true|false': TokenType.LITERAL_BOOL,
     '\d+(\.\d+)?': TokenType.LITERAL_NUM,
     '"(.*)"': TokenType.LITERAL_STR,
     '\+': TokenType.OP_PLUS,
@@ -45,10 +57,13 @@ regex_map: Mapping[str, TokenType] = {
     '/': TokenType.OP_DIV,
     '\(': TokenType.PAR_L,
     '\)': TokenType.PAR_R,
+    '{': TokenType.CURL_L,
+    '}': TokenType.CURL_R,
+    '[': TokenType.BRK_L,
+    ']': TokenType.BRK_R,
     '=': TokenType.ASSIGN,
     '[a-zA-Z]([a-zA-Z0-9])*': TokenType.IDENTIFIER,
 }
-
 
 class Token:
     def __init__(self, token_type: TokenType, value: str, position: Position):

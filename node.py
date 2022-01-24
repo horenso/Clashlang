@@ -1,5 +1,6 @@
 
 from abc import ABC, abstractmethod
+from typing import List, Optional
 from runtime import Runtime
 from tokenizer import Token, TokenType
 
@@ -11,6 +12,15 @@ class Node(ABC):
     @abstractmethod
     def eval(self, runtime: Runtime):
         pass
+
+
+class BlockNode(Node):
+    def __init__(self, stmts: List[Node]):
+        self.stmts = stmts
+
+    def eval(self, runtime: Runtime):
+        for statement in self.stmts:
+            statement.eval()
 
 
 class NumNode(Node):
@@ -33,6 +43,13 @@ class IdNode(Node):
 
     def __str__(self) -> str:
         return f'{self.token.value}'
+
+
+class IfNode(Node):
+    def __init__(self, consequence: Node, alternative: Optional[Node]):
+        self.consequence = consequence
+        self.alternative = alternative
+    
 
 
 class BinOpNode(Node):

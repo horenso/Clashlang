@@ -1,6 +1,3 @@
-from ast import Num
-
-
 class Runtime:
     def __init__(self):
         self.memory = dict()
