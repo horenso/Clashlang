@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from runtime import Runtime
-from tokenizer import Token, TokenType
+from lexer import Token, TokenType
 
 
 class Node(ABC):
@@ -49,7 +49,6 @@ class IfNode(Node):
     def __init__(self, consequence: Node, alternative: Optional[Node]):
         self.consequence = consequence
         self.alternative = alternative
-    
 
 
 class BinOpNode(Node):

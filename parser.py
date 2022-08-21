@@ -1,6 +1,6 @@
 from optparse import Option
 from node import AssigmentNode, Node, BinOpNode, IdNode, NumNode
-from tokenizer import Token, TokenType
+from lexer import Token, TokenType
 from typing import Iterator, Optional
 
 # Grammar:
@@ -53,7 +53,7 @@ class Parser():
                 return None
             return result
         return None
-    
+
     def Block(self) -> Optional[Node]:
         if not self.accept(TokenType.CURL_L):
             return None
@@ -66,7 +66,7 @@ class Parser():
                 break
         if not self.accept(TokenType.CURL_R):
             return None
-        return 
+        return
 
     # S -> let id = E;
     #    | ifS

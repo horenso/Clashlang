@@ -65,6 +65,7 @@ regex_map: Mapping[str, TokenType] = {
     '[a-zA-Z]([a-zA-Z0-9])*': TokenType.IDENTIFIER,
 }
 
+
 class Token:
     def __init__(self, token_type: TokenType, value: str, position: Position):
         self.token_type = token_type
@@ -75,7 +76,7 @@ class Token:
         return f"<{self.token_type.name} '{self.value}' [{self.position}]>"
 
 
-class Tokenizer:
+class Lexer:
     def __init__(self, string: str):
         self.string = string
         self.current_position: Position = Position()
