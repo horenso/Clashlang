@@ -5,105 +5,86 @@ from sys import stderr
 from copy import deepcopy
 from textwrap import shorten
 from typing import Type
+from attr import define, field
 
 
+@define
 class Position:
-    def __init__(self):
-        self.col = 1
-        self.row = 1
-
-    def __repr__(self):
-        return f'{self.row}:{self.col}'
+    col = field(default=1)
+    row = field(default=1)
 
 
 @unique
 class TokenType(Enum):
-    WHITESPACE = 0
-    SEMICOLON = auto()
-    IF = auto()
-    ELSE = auto()
-    LET = auto()
-    LITERAL_BOOL = auto()
-    LITERAL_NUM = auto()
-    LITERAL_STR = auto()
-    OP_PLUS = auto()
-    OP_MINUS = auto()
-    OP_MULT = auto()
-    OP_POWER = auto()
-    OP_DIV = auto()
-    PAR_L = auto()
-    PAR_R = auto()
-    CURL_L = auto()
-    CURL_R = auto()
-    BRK_L = auto()
-    BRK_R = auto()
-    ASSIGN = auto()
-    IDENTIFIER = auto()
+    WHITESPACE = "[\s\n\t\r]"
+    SEMICOLON = ";"
+
+    IF = "if"
+    ELSE = "else"
+    LET = "let"
+    FN = "fn"
+
+    LITERAL_BOOL = "true|false"
+    LITERAL_NUM = "\d+(\.\d+)?"
+    LITERAL_STR = '"(.*)"'
+
+    OP_PLUS = "\+"
+    OP_MINUS = "\-"
+    OP_MULT = "\*"
+    OP_POWER = "\*\*"
+    OP_DIV = "/"
+    PAR_L = "\("
+    PAR_R = "\)"
+    CURL_L = "{"
+    CURL_R = "}"
+    BRK_L = "["
+    BRK_R = "]"
+    EQUALS = "="
+    IDENTIFIER = "[a-zA-Z]([a-zA-Z0-9])*"
 
 
-regex_map: Mapping[str, TokenType] = {
-    '[\s\n\t\r]': TokenType.WHITESPACE,
-    ';': TokenType.SEMICOLON,
-    'if': TokenType.IF,
-    'else': TokenType.ELSE,
-    'let': TokenType.LET,
-    'true|false': TokenType.LITERAL_BOOL,
-    '\d+(\.\d+)?': TokenType.LITERAL_NUM,
-    '"(.*)"': TokenType.LITERAL_STR,
-    '\+': TokenType.OP_PLUS,
-    '\-': TokenType.OP_MINUS,
-    '\*': TokenType.OP_MULT,
-    '\*\*': TokenType.OP_POWER,
-    '/': TokenType.OP_DIV,
-    '\(': TokenType.PAR_L,
-    '\)': TokenType.PAR_R,
-    '{': TokenType.CURL_L,
-    '}': TokenType.CURL_R,
-    '[': TokenType.BRK_L,
-    ']': TokenType.BRK_R,
-    '=': TokenType.ASSIGN,
-    '[a-zA-Z]([a-zA-Z0-9])*': TokenType.IDENTIFIER,
-}
-
-
+@define(kw_only=True)
 class Token:
-    def __init__(self, token_type: TokenType, value: str, position: Position):
-        self.token_type = token_type
-        self.value = value
-        self.position = position
-
-    def __repr__(self) -> str:
-        return f"<{self.token_type.name} '{self.value}' [{self.position}]>"
+    token_type: TokenType = field()
+    value: any = field()
+    position: Position = field()
 
 
+@define()
 class Lexer:
-    def __init__(self, string: str):
-        self.string = string
-        self.current_position: Position = Position()
+    string: str = field()
+    current_position: Position = field(factory=Position)
 
     def _match_next_token(self):
-        for pattern, token_type in regex_map.items():
+        for possible_token in TokenType:
+            pattern = possible_token.value
+            token_type = possible_token
             potential_match = match(pattern, self.string)
             if potential_match:
                 s = potential_match.group(0)
-                self.string = self.string[len(s):]
-                t = Token(token_type, s, deepcopy(self.current_position))
+                self.string = self.string[len(s) :]
+                t = Token(
+                    token_type=token_type,
+                    value=s,
+                    position=deepcopy(self.current_position),
+                )
                 self.current_position.col += len(s)
                 return t
         return None
 
-    def generator(self):
+    def lex(self):
         while len(self.string) > 0:
             token = self._match_next_token()
             if token is None:
                 print(
-                    f'Invalid token[{self.current_position}]: {self.string}', file=stderr
+                    f"Invalid token[{self.current_position}]: {self.string}",
+                    file=stderr,
                 )
                 return
             if token.token_type == TokenType.WHITESPACE:
-                newline_pos = token.value.rfind('\n')
+                newline_pos = token.value.rfind("\n")
                 if newline_pos != -1:
                     self.current_position.col = newline_pos + 1
-                    self.current_position.row += token.value.count('\n')
+                    self.current_position.row += token.value.count("\n")
                 continue
             yield token

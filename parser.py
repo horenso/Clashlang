@@ -27,16 +27,16 @@ from typing import Iterator, Optional
 
 
 class Parser():
-    def __init__(self, token_generator: Iterator[Token]):
-        self.token_generator = token_generator
-        self.cur_token = next(self.token_generator, None)
+    def __init__(self, token_lex: Iterator[Token]):
+        self.token_lex = token_lex
+        self.cur_token = next(self.token_lex, None)
 
     def accept(self, token_type: TokenType) -> Optional[Token]:
         if self.cur_token is None:
             return None
         if self.cur_token.token_type == token_type:
             current = self.cur_token
-            self.cur_token = next(self.token_generator, None)
+            self.cur_token = next(self.token_lex, None)
             return current
         return None
 
@@ -47,7 +47,7 @@ class Parser():
         result = self.Stmt()
         if result:
             if self.cur_token is not None:
-                excess = list(self.token_generator)
+                excess = list(self.token_lex)
                 excess.insert(0, self.cur_token)
                 print(f'Excess: {excess}')
                 return None

@@ -11,7 +11,7 @@ def main():
     runtime = Runtime()
     while True:
         statement = input('Statement: ')
-        parser = Parser(Lexer(statement).generator())
+        parser = Parser(Lexer(statement).lex())
         tree = parser.parse()
         if tree is not None:
             print(statement)
